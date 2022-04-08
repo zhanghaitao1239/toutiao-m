@@ -1,42 +1,52 @@
 <template>
   <div class="home-container">
     <!-- 导航栏 -->
-    <van-nav-bar class="page-nav-bar">
+    <van-nav-bar class="page-nav-bar" fixed>
       <van-button class="search-btn" round slot="title" type="info" size="small" icon="search">搜索</van-button>
     </van-nav-bar>
     <!-- 导航栏 -->
     <!-- 频道列表 -->
     <van-tabs class="channel-tabs" v-model="active" animated swipeable>
-      <van-tab v-for="item in channelsList" :key="item.id" :title="item.name">
-        <!-- 文章列表 -->
-        <article-list :channel="item"></article-list>
-        <!-- 文章列表 -->
+      <van-tab v-for="channel in channelsList" :key="channel.id" :title="channel.name">
+        <!-- 文章列表组件 -->
+        <article-list :channel="channel"></article-list>
+        <!-- 文章列表组件 -->
       </van-tab>
+      <!-- 频道列表 -->
       <div slot="nav-right" class="placeholder"></div>
-      <div slot="nav-right" class="hamburger-btn">
+      <div slot="nav-right" class="hamburger-btn" @click="isChennelIEditShow = true">
         <i class="iconfont icon-gengduo"></i>
       </div>
     </van-tabs>
-    <!-- 步骤列表 -->
+    <!-- 频道列表 -->
+    <!-- 频道编辑弹出层 -->
+    <van-popup v-model="isChennelIEditShow" closeable position="bottom" close-icon-position="top-left" :style="{ height: '100%' }">
+      <ChannelEdit :myChannels="channelsList" :active="active" @UpdataActive="onUpdataActive"></ChannelEdit>
+    </van-popup>
+    <!-- 频道编辑弹出层 -->
   </div>
 </template>
 
 <script>
 // 调用获取用户频道列表模块
 import { getUserChannelsAPI } from '@/Api/index.js'
-import ArticleList from '@/components/Article-list/article-list.vue'
+import ArticleList from '@/views/Home/components/Article-list/article-list.vue'
+import ChannelEdit from '@/views/Home/components/Article-list/channel-edit.vue'
 export default {
   name: 'HomeIndex',
   components: {
     ArticleList,
+    ChannelEdit,
   },
   data() {
     return {
-      active: 2,
+      active: 0,
       channelsList: [], // 频道用户的数据
+      isChennelIEditShow: false, // 控制编辑弹出层的显示状态
     }
   },
   created() {
+    // 调用用户频道列表
     this.loadChannels()
   },
   methods: {
@@ -44,11 +54,19 @@ export default {
     async loadChannels() {
       try {
         const { data } = await getUserChannelsAPI()
-        console.log(data)
+        // console.log(data)
+        // 将请求回来的频道列表数据，存放到channelsList
         this.channelsList = data.data.channels
       } catch (err) {
         this.$toast('获取频道数据失败')
       }
+    },
+    // 修改对应频道
+    onUpdataActive(index, isChennelIEditShow = true) {
+      // 将频道选择对应频道激活
+      this.active = index
+      // 将弹出层关闭
+      this.isChennelIEditShow = isChennelIEditShow
     },
   },
 }
@@ -56,6 +74,7 @@ export default {
 
 <style lang="less" scoped>
 .home-container {
+  padding-top: 174px;
   padding-bottom: 100px;
   /deep/.van-nav-bar__title {
     max-width: unset;
@@ -70,8 +89,16 @@ export default {
       font-size: 32px;
     }
   }
-  /deep/.channel-tabs {
+  /deep/ .channel-tabs {
+    .van-tabs__contents {
+      min-height: 79vh;
+    }
     .van-tabs__wrap {
+      position: fixed;
+      top: 92px;
+      z-index: 1;
+      left: 0;
+      right: 0;
       height: 82px;
     }
     .van-tab {
