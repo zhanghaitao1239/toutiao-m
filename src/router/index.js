@@ -5,12 +5,14 @@ Vue.use(VueRouter)
 // 路由规则数据
 const routes = [
   {
+    // 登录
     path: '/login',
     name: 'login',
     component: () => import('@/views/Login/index.vue'),
   },
 
   {
+    // 首页
     path: '/',
     // name: 'layout',// 如果父路由有默认子路由，那它的name 没有意义
     component: () => import('@/views/Layout/index.vue'),
@@ -37,6 +39,25 @@ const routes = [
         component: () => import('@/views/My/index.vue'),
       },
     ],
+  },
+  {
+    // 搜索
+    path: '/search',
+    name: 'search',
+    component: () => import('@/views/search/index.vue'),
+  },
+  {
+    // 文章详情
+    path: '/article/:articleId',
+    name: 'artivle',
+    component: () => import('@/views/Article/index.vue'),
+    props: true, // 开启Props传参，将路由参数映射到路由组件中
+  },
+  // 用户信息编辑
+  {
+    path: '/user/profile',
+    name: 'user-profile',
+    component: () => import('@/views/user-profile/index.vue'),
   },
 ]
 

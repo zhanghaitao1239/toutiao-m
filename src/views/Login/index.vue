@@ -81,7 +81,7 @@ export default {
         const { data } = await loginAPI(user)
         // 使用Vuex方法，将登录成功后的获得token存入到Vuex中
         this.$store.commit('setUser', data.data)
-        console.log('登录成功')
+        // console.log('登录成功')
         this.$toast.success('登录成功')
         // 登录成功，跳转加原来页面
         // back 的方式不严谨，后面讲功能优化的时候再说
@@ -101,7 +101,7 @@ export default {
       // 1.校验手机号
       try {
         await this.$refs.loginForm.validate('mobile')
-        console.log('验证通过')
+        // console.log('验证通过')
       } catch (err) {
         return console.log('验证失败', err)
       }

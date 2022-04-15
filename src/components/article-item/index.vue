@@ -1,23 +1,21 @@
 <template>
-  <div class="article-item">
-    <van-cell>
-      <div slot="title" class="title van-multi-ellipsis--l2">{{ article.title }}</div>
-      <div slot="label">
-        <div class="cover-wrap" v-if="article.cover.type === 3">
-          <div class="cover-item" v-for="(item, index) in article.cover.images" :key="index">
-            <van-image class="cover-img" fit="cover" :src="item" />
-          </div>
+  <van-cell class="article-item" :to="`/article/${article.art_id}`">
+    <div slot="title" class="title van-multi-ellipsis--l2">{{ article.title }}</div>
+    <div slot="label">
+      <div class="cover-wrap" v-if="article.cover.type === 3">
+        <div class="cover-item" v-for="(item, index) in article.cover.images" :key="index">
+          <van-image class="cover-img" fit="cover" :src="item" />
         </div>
       </div>
-      <div class="label-info-wrap">
-        <span>{{ article.aut_name }}</span>
-        <span>{{ article.comm_count }}评论</span>
-        <span>{{ article.pubdate | relativeTime }}</span>
-      </div>
+    </div>
+    <div class="label-info-wrap">
+      <span>{{ article.aut_name }}</span>
+      <span>{{ article.comm_count }}评论</span>
+      <span>{{ article.pubdate | relativeTime }}</span>
+    </div>
 
-      <van-image class="right-cover" slot="default" fit="cover" v-if="article.cover.type === 1" :src="article.cover.images[0]"></van-image>
-    </van-cell>
-  </div>
+    <van-image class="right-cover" slot="default" fit="cover" v-if="article.cover.type === 1" :src="article.cover.images[0]"></van-image>
+  </van-cell>
 </template>
 
 <script>

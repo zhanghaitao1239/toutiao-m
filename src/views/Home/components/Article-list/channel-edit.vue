@@ -22,8 +22,16 @@
 </template>
 
 <script>
+// 目标1：使用vant 组件中的弹出层组件，渲染页面
+// 目标2：请求频道数据，并渲染到页面上
+// 目标3：使用计算属性来显示 响应式我的频道和推荐频道中的数据
+// 目标4：点击编辑按钮进行删除和跳转到对应的频道
+// 目标5：频道编辑，让数据持久化
+// 目标6：删除频道，数据持久化
 // 导入获取所有频道列表接口
-import { getChannelAllAPI } from '@/Api/index.js'
+import { getChannelAllAPI, addUserChannelAPI, deleteUserChannelAPI } from '@/Api/index.js'
+import { mapState } from 'vuex'
+import { setItem } from '@/utils/storage.js'
 export default {
   name: 'channel-edit',
   props: {
@@ -33,6 +41,7 @@ export default {
       required: true,
     },
     active: {
+      // 激活状态
       type: Number,
       required: true,
     },
@@ -50,6 +59,8 @@ export default {
     this.loadAllChannels()
   },
   computed: {
+    ...mapState(['user']),
+    // 计算频道推荐响应式数据
     recommendChannels() {
       return this.channelAll.filter((channel) => {
         return !this.MyChannels.find((myChannel) => {
@@ -82,9 +93,24 @@ export default {
       }
     },
     // 点击将频道推荐当前项添加到我的频道里
-    onAddChannel(channel) {
-      // console.log(channel)
+    async onAddChannel(channel) {
       this.MyChannels.push(channel)
+
+      // 5.1 数据持久化处理
+      if (this.user) {
+        try {
+          // 已登录，把数据请求接口放到线上
+          await addUserChannelAPI({
+            id: channel.id, // 频道ID
+            seq: this.MyChannels.length, // 序号
+          })
+        } catch (err) {
+          this.$toast('保存失败，请稍后重试')
+        }
+      } else {
+        // 未登录，把数据存储到本地
+        setItem('TOUTIAO_CHANNELS', this.MyChannels)
+      }
     },
     // 点击修改我的频道
     onMychannelClick(item, index) {
@@ -99,9 +125,26 @@ export default {
           this.$emit('UpdataActive', this.active - 1, true)
         }
         this.MyChannels.splice(index, 1)
+        // 6.1处理持久化
+        // 调用删除方法
+        this.deleteChannel(item)
       } else {
         // 非编辑状态，执行切换频道
         this.$emit('UpdataActive', index, false)
+      }
+    },
+    // 删除持久化方法
+    async deleteChannel(channel) {
+      try {
+        if (this.user) {
+          // 已登录，则数据更新到线上
+          await deleteUserChannelAPI(channel.id)
+        } else {
+          // 未便当，将数据存储到本地
+          setItem('TOUTIAO_CHANNELS', this.MyChannels)
+        }
+      } catch (err) {
+        this.$toast('操作失败，请稍后重试')
       }
     },
   },

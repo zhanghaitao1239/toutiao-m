@@ -2,7 +2,7 @@
   <div class="home-container">
     <!-- 导航栏 -->
     <van-nav-bar class="page-nav-bar" fixed>
-      <van-button class="search-btn" round slot="title" type="info" size="small" icon="search">搜索</van-button>
+      <van-button class="search-btn" round slot="title" type="info" size="small" icon="search" to="/search">搜索</van-button>
     </van-nav-bar>
     <!-- 导航栏 -->
     <!-- 频道列表 -->
@@ -32,6 +32,8 @@
 import { getUserChannelsAPI } from '@/Api/index.js'
 import ArticleList from '@/views/Home/components/Article-list/article-list.vue'
 import ChannelEdit from '@/views/Home/components/Article-list/channel-edit.vue'
+import { mapState } from 'vuex'
+import { getItem } from '@/utils/storage.js'
 export default {
   name: 'HomeIndex',
   components: {
@@ -49,14 +51,35 @@ export default {
     // 调用用户频道列表
     this.loadChannels()
   },
+  computed: {
+    ...mapState(['user']),
+  },
   methods: {
     // 获取用户频道列表数据方法
     async loadChannels() {
       try {
-        const { data } = await getUserChannelsAPI()
-        // console.log(data)
-        // 将请求回来的频道列表数据，存放到channelsList
-        this.channelsList = data.data.channels
+        // const { data } = await getUserChannelsAPI()
+        // // console.log(data)
+        // // 将请求回来的频道列表数据，存放到channelsList
+        // this.channelsList = data.data.channels
+        let channels = []
+        // 已登录，请求获取用户列表
+        if (this.user) {
+          const { data } = await getUserChannelsAPI()
+          channels = data.data.channels
+        } else {
+          // 未登录，判断是否有本地的频道列表数据
+          const loadChannels = getItem('TOUTIAO_CHANNELS')
+          // 有，拿来使用
+          if (loadChannels) {
+            channels = loadChannels
+          } else {
+            // 没有，请求获取默认频道列表
+            const { data } = await getUserChannelsAPI()
+            channels = data.data.channels
+          }
+        }
+        this.channelsList = channels
       } catch (err) {
         this.$toast('获取频道数据失败')
       }
